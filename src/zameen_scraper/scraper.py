@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import httpx
 
+from .parser import parse_listing_page
+from .search import build_search_url
+
 
 BASE_URL = "https://www.zameen.com"
 
@@ -32,3 +35,25 @@ def fetch_page(
         response.raise_for_status()
 
         return response.status_code, response.text
+
+
+def scrape_listings(
+    city: str,
+    purpose: str | None = None,
+    page: int | None = None,
+    timeout: float = 20.0,
+):
+    """Fetch and parse property listings for a city."""
+
+    url = build_search_url(
+        city,
+        purpose=purpose,
+        page=page,
+    )
+
+    _, html = fetch_page(
+        url,
+        timeout=timeout,
+    )
+
+    return parse_listing_page(html)

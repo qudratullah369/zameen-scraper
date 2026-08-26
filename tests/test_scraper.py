@@ -96,3 +96,42 @@ def test_fetch_page_timeout(monkeypatch):
         pass
     else:
         raise AssertionError("Expected TimeoutException")
+import zameen_scraper.scraper as scraper
+
+
+def test_scrape_listings(monkeypatch):
+    html = """
+    <html>
+      <body>
+        <article class="property-card">
+          <a href="/Property/123456.html">
+            <h2>5 Marla House</h2>
+          </a>
+          <div class="price">PKR 2.5 Crore</div>
+          <div class="location">DHA Lahore</div>
+          <div class="beds">4 Beds</div>
+          <div class="baths">5 Baths</div>
+          <div class="area">5 Marla</div>
+          <div class="description">Beautiful house</div>
+          <div class="agent-name">Ali Estate</div>
+          <div class="phone">03001234567</div>
+          <div class="email">agent@example.com</div>
+        </article>
+      </body>
+    </html>
+    """
+
+    def mock_fetch_page(url, timeout=20.0):
+        assert url == "https://www.zameen.com/Homes/Lahore-1-1.html"
+        return 200, html
+
+    monkeypatch.setattr(scraper, "fetch_page", mock_fetch_page)
+
+    listings = scraper.scrape_listings("lahore")
+
+    assert len(listings) == 1
+    assert listings[0].property_id == "123456"
+    assert listings[0].title == "5 Marla House"
+    assert listings[0].phone == "03001234567"
+    assert listings[0].email == "agent@example.com"
+    assert listings[0].agent_name == "Ali Estate"
