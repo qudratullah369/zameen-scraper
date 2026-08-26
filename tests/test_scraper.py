@@ -135,3 +135,53 @@ def test_scrape_listings(monkeypatch):
     assert listings[0].phone == "03001234567"
     assert listings[0].email == "agent@example.com"
     assert listings[0].agent_name == "Ali Estate"
+
+def test_scrape_listings_extracts_detail_phone(monkeypatch):
+    search_html = """
+    <html>
+      <body>
+        <article class="property-card">
+          <a href="/Property/lahore_park_view_city_test_house-54585698-1466-1.html">
+            <h2>5 Marla House</h2>
+          </a>
+          <div class="price">PKR 2.5 Crore</div>
+          <div class="location">Park View City Lahore</div>
+          <div class="beds">4 Beds</div>
+          <div class="baths">5 Baths</div>
+          <div class="area">5 Marla</div>
+        </article>
+      </body>
+    </html>
+    """
+
+    detail_html = """
+    <html>
+      <body>
+        <script>
+          {
+            "phoneNumber": {
+              "phone": "+923144303627",
+              "whatsapp": "923144303627",
+              "mobile": "+923144303627"
+            }
+          }
+        </script>
+      </body>
+    </html>
+    """
+
+    def mock_fetch_page(url, timeout=20.0):
+        if url == "https://www.zameen.com/Homes/Lahore-1-1.html":
+            return 200, search_html
+
+        assert url == "https://www.zameen.com/Property/lahore_park_view_city_test_house-54585698-1466-1.html"
+        return 200, detail_html
+
+    monkeypatch.setattr(scraper, "fetch_page", mock_fetch_page)
+
+    listings = scraper.scrape_listings("lahore")
+
+    assert len(listings) == 1
+    assert listings[0].property_id == "54585698"
+    assert listings[0].phone == "+923144303627"
+    assert listings[0].whatsapp == "923144303627"

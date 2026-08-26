@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import httpx
 
-from .parser import parse_listing_page
+from .parser import extract_phone_from_detail, parse_listing_page
 from .search import build_search_url
 
 
@@ -56,4 +56,21 @@ def scrape_listings(
         timeout=timeout,
     )
 
-    return parse_listing_page(html)
+    listings = parse_listing_page(html)
+
+    for listing in listings:
+        if not listing.listing_url:
+            continue
+
+        try:
+            _, detail_html = fetch_page(listing.listing_url, timeout=timeout)
+            phone_data = extract_phone_from_detail(detail_html)
+            if phone_data.get("phone"):
+                listing.phone = phone_data["phone"]
+            if phone_data.get("whatsapp"):
+                listing.whatsapp = phone_data["whatsapp"]
+        except Exception:
+            continue
+
+    return listings
+
