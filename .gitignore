@@ -11,3 +11,5 @@ __pycache__/
 output/*.html
 output/*.json
 output/*.csv
+
+output/
