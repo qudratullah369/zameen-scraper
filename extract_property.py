@@ -11,7 +11,7 @@ def extract_property_data(file_path):
     # Find the main property JSON object using its unique ID
     # ---------------------------------------------------------
     property_id_match = re.search(
-        r'"externalID"\s*:\s*"?(54663983)"?',
+        r'"externalID"\s*:\s*"?(\d+)"?',
         html
     )
 
