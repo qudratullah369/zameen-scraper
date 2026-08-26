@@ -2,4 +2,12 @@
 __pycache__/
 *.pyc
 .env
+
+# Backups
+*.backup
+*.backup2
+
+# Scraped/raw HTML and generated exports
 output/*.html
+output/*.json
+output/*.csv
