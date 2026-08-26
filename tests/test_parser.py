@@ -1,4 +1,4 @@
-from zameen_scraper.parser import parse_listing_card
+from zameen_scraper.parser import parse_listing_card, parse_listing_page
 
 
 SAMPLE_HTML = """
@@ -71,3 +71,45 @@ def test_parse_listing_card_with_invalid_property_id():
     assert listing.title == "Property Without Numeric ID"
     assert listing.property_id is None
     assert listing.listing_url == "https://www.zameen.com/Property/abc.html"
+
+def test_parse_listing_page():
+    html = """
+    <html>
+      <body>
+        <article class="property-card">
+          <a href="/Property/123456.html">
+            <h2>5 Marla House</h2>
+          </a>
+          <div class="price">PKR 2.5 Crore</div>
+          <div class="location">DHA Lahore</div>
+          <div class="beds">4 Beds</div>
+          <div class="baths">5 Baths</div>
+          <div class="area">5 Marla</div>
+          <div class="description">Beautiful house</div>
+          <div class="agent-name">Ali Estate</div>
+          <div class="phone">03001234567</div>
+          <div class="email">agent@example.com</div>
+        </article>
+
+        <article class="property-card">
+          <a href="/Property/789012.html">
+            <h2>10 Marla House</h2>
+          </a>
+          <div class="price">PKR 4.8 Crore</div>
+          <div class="location">Bahria Town Lahore</div>
+          <div class="beds">5 Beds</div>
+          <div class="baths">6 Baths</div>
+          <div class="area">10 Marla</div>
+        </article>
+      </body>
+    </html>
+    """
+
+    listings = parse_listing_page(html)
+
+    assert len(listings) == 2
+    assert listings[0].property_id == "123456"
+    assert listings[0].title == "5 Marla House"
+    assert listings[0].phone == "03001234567"
+    assert listings[0].email == "agent@example.com"
+    assert listings[1].property_id == "789012"

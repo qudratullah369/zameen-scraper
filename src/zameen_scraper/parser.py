@@ -58,6 +58,10 @@ def parse_listing_card(html: str) -> PropertyListing:
     bathrooms = _extract_int(_text(card.select_one(".baths")))
     area = _text(card.select_one(".area"))
 
+    agent_name = _text(card.select_one(".agent-name"))
+    phone = _text(card.select_one(".phone"))
+    email = _text(card.select_one(".email"))
+
     return PropertyListing(
         property_id=_extract_property_id(href),
         title=title,
@@ -68,4 +72,20 @@ def parse_listing_card(html: str) -> PropertyListing:
         area=area,
         description=description,
         listing_url=listing_url,
+        agent_name=agent_name,
+        phone=phone,
+        email=email,
     )
+
+
+def parse_listing_page(html: str) -> list[PropertyListing]:
+    """Parse all property listing cards from one HTML page."""
+
+    soup = BeautifulSoup(html, "lxml")
+
+    cards = soup.select("article.property-card")
+
+    return [
+        parse_listing_card(str(card))
+        for card in cards
+    ]
